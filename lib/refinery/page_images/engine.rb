@@ -21,7 +21,7 @@ module Refinery
 
       config.to_prepare do
       	Refinery::PageImages.attach_to.each do |e|
-      		eval "#{e}.send :has_many_page_images if defined?(::#{e})"
+      		send("#{e}", :has_many_page_images) if defined?(::"#{e}")
 		end
         Refinery::Image.module_eval do
           has_many :image_pages, :dependent => :destroy
