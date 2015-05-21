@@ -2,8 +2,8 @@ module Refinery
   module PageImages
     module Extension
       def has_many_page_images
-        has_many :image_pages, :as => :page, :order => 'position ASC'
-        has_many :images, :through => :image_pages, :order => 'position ASC'
+        has_many :image_pages, proc { order('position ASC') }, :as => :page, :class_name => 'Refinery::ImagePage'
+        has_many :images, proc { order('position ASC') }, :through => :image_pages, :class_name => 'Refinery::Image'
         # accepts_nested_attributes_for MUST come before def images_attributes=
         # this is because images_attributes= overrides accepts_nested_attributes_for.
 
@@ -13,14 +13,13 @@ module Refinery
         # deletes an already defined images_attributes
         module_eval do
           def images_attributes=(data)
-            ids_to_keep = data.map{|i, d| d['image_page_id']}.compact
+            data = data.reject {|_, data| data.blank?}
+            ids_to_keep = data.map{|_, d| d['image_page_id']}.compact
 
             image_pages_to_delete = if ids_to_keep.empty?
               self.image_pages
             else
-              self.image_pages.where(
-                Refinery::ImagePage.arel_table[:id].not_in(ids_to_keep)
-              )
+              self.image_pages.where.not(:id => ids_to_keep)
             end
 
             image_pages_to_delete.destroy_all
@@ -45,8 +44,6 @@ module Refinery
         end
 
         include Refinery::PageImages::Extension::InstanceMethods
-
-        attr_accessible :images_attributes
       end
 
       module InstanceMethods

@@ -2,68 +2,39 @@ source "http://rubygems.org"
 
 gemspec
 
-gem 'refinerycms', :git => 'git://github.com/resolve/refinerycms.git'
+gem 'refinerycms', git: 'https://github.com/refinery/refinerycms'
+gem 'refinerycms-i18n', git: 'https://github.com/refinery/refinerycms-i18n'
+gem 'refinerycms-wymeditor', '~> 1.0.0'
 
-group :development, :test do
-  gem 'refinerycms-testing', :git => 'git://github.com/resolve/refinerycms.git'
-  gem 'guard-rspec', '~> 0.6.0'
+gem "mime-types", "~> 1.25"
 
-  platforms :jruby do
-    gem 'activerecord-jdbcsqlite3-adapter'
-    gem 'activerecord-jdbcmysql-adapter'
-    gem 'activerecord-jdbcpostgresql-adapter'
-    gem 'jruby-openssl'
-  end
+group :test do
+  gem 'refinerycms-testing', git: 'https://github.com/refinery/refinerycms'
+  gem 'poltergeist'
+end
 
-  unless defined?(JRUBY_VERSION)
-    gem 'sqlite3'
-    gem 'mysql2'
-    gem 'pg'
-  end
+# Database Configuration
+unless ENV['TRAVIS']
+  gem 'activerecord-jdbcsqlite3-adapter', :platform => :jruby
+  gem 'sqlite3', :platform => :ruby
+end
 
-  platforms :mswin, :mingw do
-    gem 'win32console'
-    gem 'rb-fchange', '~> 0.0.5'
-    gem 'rb-notifu', '~> 0.0.4'
-  end
+if !ENV['TRAVIS'] || ENV['DB'] == 'mysql'
+  gem 'activerecord-jdbcmysql-adapter', :platform => :jruby
+  gem 'jdbc-mysql', '= 5.1.13', :platform => :jruby
+  gem 'mysql2', :platform => :ruby
+end
 
-  platforms :ruby do
-    gem 'spork', '~> 0.9.0.rc'
-    gem 'guard-spork'
-
-    unless ENV['TRAVIS']
-      require 'rbconfig'
-      if RbConfig::CONFIG['target_os'] =~ /darwin/i
-        gem 'rb-fsevent', '>= 0.3.9'
-        gem 'ruby_gntp'
-      end
-      if RbConfig::CONFIG['target_os'] =~ /linux/i
-        gem 'rb-inotify', '>= 0.5.1'
-        gem 'libnotify',  '~> 0.1.3'
-        gem 'therubyracer', '~> 0.9.9'
-      end
-    end
-  end
-
-  platforms :jruby do
-    unless ENV['TRAVIS']
-      require 'rbconfig'
-      if RbConfig::CONFIG['target_os'] =~ /darwin/i
-        gem 'ruby_gntp'
-      end
-      if RbConfig::CONFIG['target_os'] =~ /linux/i
-        gem 'rb-inotify', '>= 0.5.1'
-        gem 'libnotify',  '~> 0.1.3'
-      end
-    end
-  end
+if !ENV['TRAVIS'] || ENV['DB'] == 'postgresql'
+  gem 'activerecord-jdbcpostgresql-adapter', :platform => :jruby
+  gem 'pg', :platform => :ruby
 end
 
 # Refinery/rails should pull in the proper versions of these
-group :assets do
-  gem 'sass-rails'
-  gem 'coffee-rails'
-  gem 'uglifier'
-end
+gem 'sass-rails', '~> 4.0.0'
+gem 'coffee-rails', '~> 4.0.0'
 
-gem 'jquery-rails'
+# Load local gems according to Refinery developer preference.
+if File.exist? local_gemfile = File.expand_path('../.gemfile', __FILE__)
+  eval File.read(local_gemfile)
+end

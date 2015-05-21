@@ -1,15 +1,17 @@
 require 'spec_helper'
 
 module Refinery
-  describe BlogPost do
-    it "should not have images" do
-      blog = Factory(:blog_post)
-      blog.images.count.should == 0
-    end
+  module Blog
+    describe Post, type: :model do
+      it "should not have images" do
+        blog = FactoryGirl.create(:blog_post)
+        expect(blog.images.count).to eq(0)
+      end
 
-    it "should have images" do
-      blog = Factory(:blog_post_with_image)
-      blog.images.count.should == 1
+      it "should have images" do
+        blog = FactoryGirl.create(:blog_post_with_image)
+        expect(blog.images.count).to eq(1)
+      end
     end
-  end 
+  end
 end if defined?(Refinery::Blog::Post)

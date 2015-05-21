@@ -1,3 +1,5 @@
+require 'refinery/page_images/configuration'
+
 module Refinery
   module PageImages
     class Engine < Rails::Engine
@@ -12,34 +14,31 @@ module Refinery
         tab.partial = "/refinery/admin/pages/tabs/images"
       end
 
-      initializer "register refinery_page_images plugin" do
+      def self.initialize_tabs!
+        PageImages.config.enabled_tabs.each do |tab_class_name|
+          unless (tab_class = tab_class_name.safe_constantize)
+            Rails.logger.warn "PageImages is unable to find tab class: #{tab_class_name}"
+            next
+          end
+          tab_class.register { |tab| register tab }
+        end
+      end
+
+      before_inclusion do
         Refinery::Plugin.register do |plugin|
-          plugin.name = "page_images"
+          plugin.name = 'page_images'
+          plugin.pathname = root
           plugin.hide_from_menu = true
         end
       end
 
       config.to_prepare do
-      	Refinery::PageImages.attach_to.each do |e|
-      		send("#{e}", :has_many_page_images) if defined?(::"#{e}")
-		end
-        Refinery::Image.module_eval do
-          has_many :image_pages, :dependent => :destroy
-        end
+        Refinery::PageImages.attach!
       end
 
       config.after_initialize do
-        Refinery::Pages::Tab.register do |tab|
-          register tab
-        end
-
-        if defined?(Refinery::Blog::Tab)
-          Refinery::Blog::Tab.register do |tab|
-            register tab
-          end
-        end
-
-        Refinery.register_engine(Refinery::PageImages)
+        initialize_tabs!
+        Refinery.register_engine Refinery::PageImages
       end
     end
   end
