@@ -1,12 +1,14 @@
 # Page Images Engine for Refinery CMS
 
+[![Build Status](https://travis-ci.org/refinery/refinerycms-page-images.svg?branch=master)](https://travis-ci.org/refinery/refinerycms-page-images)
+
 ## About
 
 Page Images allows you to relate one or more images to any page in Refinery which makes it really easy for you to create simple image galleries with lightbox style popups on the front end page views.
 
 ## Requirements
 
-* refinerycms >= 3.0.0
+* refinerycms-pages ~> 4.0
 
 ## Features
 
@@ -21,7 +23,7 @@ Page Images allows you to relate one or more images to any page in Refinery whic
 Add this line to your application's `Gemfile`
 
 ```ruby
-gem 'refinerycms-page-images', '~> 3.0.0'
+gem 'refinerycms-page-images', '~> 4.0.0', git: "https://github.com/refinery/refinerycms-page-images", branch: "master"
 ```
 
 Next run
@@ -35,6 +37,8 @@ rake db:migrate
 Now when you start up your Refinery application, edit a page and there should be a new "Images" tab.
 
 # Deploying to Heroku
+
+Note: the following information about assets on Heroku might be out of date.
 
 In order to properly precompile assets on Heroku, config vars must be present in the environment during slug compilation.
 
@@ -70,7 +74,7 @@ Refinery::PageImages.wysiwyg = false
 Note that WYMeditor support requires that you have the extension in your Gemfile:
 
 ```ruby
-gem 'refinerycms-wymeditor', '~> 1.0.0'
+gem 'refinerycms-wymeditor', ['~> 2.0', '>= 2.0.0']
 ```
 
 ## Usage
